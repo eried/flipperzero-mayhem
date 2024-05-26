@@ -6,8 +6,7 @@
 #include "configs.h"
 
 #include "settings.h"
-#include "FS.h"                // SD Card ESP32
-#include "SD_MMC.h"            // SD Card ESP32
+#include "SD.h"
 #include "Buffer.h"
 #ifdef HAS_SCREEN
   #include "Display.h"
@@ -27,6 +26,9 @@ extern Settings settings_obj;
 class SDInterface {
 
   private:
+#if defined(MARAUDER_M5STICKC)
+  SPIClass *spiExt;
+#endif
     bool checkDetectPin();
 
   public:
@@ -36,22 +38,20 @@ class SDInterface {
     uint64_t cardSizeMB;
     //uint64_t cardSizeGB;
     bool supported = false;
-    bool do_save = true;
 
     String card_sz;
-
+  
     bool initSD();
+
+    LinkedList<String>* sd_files;
 
     void listDir(String str_dir);
     void listDirToLinkedList(LinkedList<String>* file_names, String str_dir = "/", String ext = "");
     File getFile(String path);
-    void addPacket(uint8_t* buf, uint32_t len, bool log = false);
-    void openCapture(String file_name = "");
-    void openLog(String file_name = "");
     void runUpdate();
     void performUpdate(Stream &updateSource, size_t updateSize);
     void main();
-    //void savePacket(uint8_t* buf, uint32_t len);
+    bool removeFile(String file_path);
 };
 
 #endif

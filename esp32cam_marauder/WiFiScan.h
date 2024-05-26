@@ -164,7 +164,7 @@ class WiFiScan
     bool force_pmkid = false;
     bool force_probe = false;
     bool save_pcap = false;
-
+  
     int x_pos; //position along the graph x axis
     float y_pos_x; //current graph y axis position of X value
     float y_pos_x_old = 120; //old y axis position of X value
@@ -196,7 +196,6 @@ class WiFiScan
 
     //String connected_network = "";
     //const String alfa = "1234567890qwertyuiopasdfghjkklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM_";
-    const String alfa = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789-=[];',./`\\_+{}:\"<>?~|!@#$%^&*()";
 
     const char* rick_roll[8] = {
       "01 Never gonna give you up",
@@ -221,7 +220,7 @@ class WiFiScan
       int16_t seqctl;
       unsigned char payload[];
     } __attribute__((packed)) WifiMgmtHdr;
-
+    
     typedef struct {
       uint8_t payload[0];
       WifiMgmtHdr hdr;
@@ -229,7 +228,7 @@ class WiFiScan
 
     // barebones packet
     uint8_t packet[128] = { 0x80, 0x00, 0x00, 0x00, //Frame Control, Duration
-                    /*4*/   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, //Destination address
+                    /*4*/   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, //Destination address 
                     /*10*/  0x01, 0x02, 0x03, 0x04, 0x05, 0x06, //Source address - overwritten later
                     /*16*/  0x01, 0x02, 0x03, 0x04, 0x05, 0x06, //BSSID - overwritten to the same as the source address
                     /*22*/  0xc0, 0x6c, //Seq-ctl
@@ -240,7 +239,7 @@ class WiFiScan
                     /*36*/  0x00
                     };
 
-    uint8_t prob_req_packet[128] = {0x40, 0x00, 0x00, 0x00,
+    uint8_t prob_req_packet[128] = {0x40, 0x00, 0x00, 0x00, 
                                   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // Destination
                                   0x01, 0x02, 0x03, 0x04, 0x05, 0x06, // Source
                                   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // Dest
@@ -332,6 +331,7 @@ class WiFiScan
     void RunLvJoinWiFi(uint8_t scan_mode, uint16_t color);
     void RunEvilPortal(uint8_t scan_mode, uint16_t color);
     bool checkMem();
+    void parseBSSID(const char* bssidStr, uint8_t* bssid);
 
 
   public:
@@ -356,6 +356,9 @@ class WiFiScan
     String dst_mac = "ff:ff:ff:ff:ff:ff";
     byte src_mac[6] = {};
 
+    String current_mini_kb_ssid = "";
+
+    const String alfa = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789-=[];',./`\\_+{}:\"<>?~|!@#$%^&*()";
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     wifi_config_t ap_config;
@@ -383,13 +386,20 @@ class WiFiScan
     void RunClearSSIDs();
     void RunClearAPs();
     void RunClearStations();
+    void RunSaveSSIDList(bool save_as = true);
+    void RunLoadSSIDList();
+    void RunSaveAPList(bool save_as = true);
+    void RunLoadAPList();
     void channelHop();
     uint8_t currentScanMode = 0;
     void main(uint32_t currentTime);
     void StartScan(uint8_t scan_mode, uint16_t color = 0);
     void StopScan(uint8_t scan_mode);
     const char* generateRandomName();
-    //void addLog(String log, int len);
+
+    bool save_serial = false;
+    void startPcap(String file_name);
+    void startLog(String file_name);
 
     static void getMAC(char *addr, uint8_t* data, uint16_t offset);
     static void pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
@@ -404,7 +414,6 @@ class WiFiScan
     static void activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
-    static void addPacket(wifi_promiscuous_pkt_t *snifferPacket, int len);
 
     /*#ifdef HAS_BT
       enum EBLEPayloadType
