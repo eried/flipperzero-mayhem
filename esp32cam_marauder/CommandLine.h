@@ -8,7 +8,7 @@
 #ifdef HAS_SCREEN
   #include "MenuFunctions.h"
   #include "Display.h"
-#endif
+#endif 
 
 #include "WiFiScan.h"
 //#include "Web.h"
@@ -80,6 +80,8 @@ const char PROGMEM ATTACK_TYPE_RR[] = "rickroll";
 const char PROGMEM LIST_AP_CMD[] = "list";
 const char PROGMEM SEL_CMD[] = "select";
 const char PROGMEM SSID_CMD[] = "ssid";
+const char PROGMEM SAVE_CMD[] = "save";
+const char PROGMEM LOAD_CMD[] = "load";
 
 // Bluetooth sniff/scan
 const char PROGMEM BT_SPAM_CMD[] = "blespam";
@@ -131,6 +133,8 @@ const char PROGMEM HELP_LIST_AP_CMD_C[] = "list -c";
 const char PROGMEM HELP_SEL_CMD_A[] = "select -a/-s/-c <index (comma separated)>/-f \"equals <String> or contains <String>\"";
 const char PROGMEM HELP_SSID_CMD_A[] = "ssid -a [-g <count>/-n <name>]";
 const char PROGMEM HELP_SSID_CMD_B[] = "ssid -r <index>";
+const char PROGMEM HELP_SAVE_CMD[] = "save -a/-s";
+const char PROGMEM HELP_LOAD_CMD[] = "load -a/-s";
 
 // Bluetooth sniff/scan
 const char PROGMEM HELP_BT_SNIFF_CMD[] = "sniffbt";
@@ -184,7 +188,7 @@ class CommandLine {
     "                      @@@@@@                \r\n"
     "                        @@@@                \r\n"
     "\r\n";
-
+        
   public:
     CommandLine();
 
