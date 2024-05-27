@@ -934,7 +934,7 @@ void WiFiScan::startPcap(String file_name) {
   buffer_obj.pcapOpen(
     file_name,
     #if defined(HAS_SD)
-      sd_obj.supported ? &SD :
+      sd_obj.supported ? &SD_MMC :
     #endif
     NULL,
     save_serial // Set with commandline options
@@ -945,7 +945,7 @@ void WiFiScan::startLog(String file_name) {
   buffer_obj.logOpen(
     file_name,
     #if defined(HAS_SD)
-      sd_obj.supported ? &SD :
+      sd_obj.supported ? &SD_MMC :
     #endif
     NULL,
     save_serial // Set with commandline options

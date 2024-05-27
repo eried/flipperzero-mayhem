@@ -37,6 +37,9 @@ extern const String PROGMEM version_number;
 extern const String PROGMEM board_target;
 
 //// Commands
+// Camera functions
+const char PROGMEM CAM_PHOTO[] = "photo";
+const char PROGMEM CAM_FLASHLIGHT[] = "flashlight";
 
 // Admin
 const char PROGMEM CH_CMD[] = "channel";

@@ -173,6 +173,16 @@ void backlightOff() {
   #endif
 }
 
+void motion_detection_setup();
+void motion_detection_loop();
+void qr_reader_setup();
+void qr_reader_loop();
+void cam_stream_setup();
+void cam_stream_loop();
+void nanny_cam_setup();
+void nanny_cam_loop();
+void morse_setup();
+void morse_loop();
 
 void setup()
 {
@@ -231,6 +241,8 @@ void setup()
   }
   continue_to_marauder:;
 
+  //pinMode(FLASH_BUTTON, INPUT);
+
   #ifdef HAS_SCREEN
     pinMode(TFT_BL, OUTPUT);
   #endif
@@ -246,7 +258,7 @@ void setup()
     digitalWrite(TFT_CS, HIGH);
   #endif
   
-  #ifdef HAS_SD
+  /*#ifdef HAS_SD
     pinMode(SD_CS, OUTPUT);
 
     delay(10);
@@ -256,7 +268,7 @@ void setup()
     delay(10);
   #endif
 
-  Serial.begin(115200);
+  Serial.begin(115200);*/
 
   Serial.println("ESP-IDF version is: " + String(esp_get_idf_version()));
 
@@ -452,6 +464,7 @@ void loop()
     sd_obj.main();
   #endif
 
+  // Save buffer to SD and/or serial
   buffer_obj.save();
 
   #ifdef HAS_BATTERY

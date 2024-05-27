@@ -6,7 +6,8 @@
 #include "configs.h"
 
 #include "settings.h"
-#include "SD.h"
+#include "FS.h"                // SD Card ESP32
+#include "SD_MMC.h"            // SD Card ESP32
 #include "Buffer.h"
 #ifdef HAS_SCREEN
   #include "Display.h"

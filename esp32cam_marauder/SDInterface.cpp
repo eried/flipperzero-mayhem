@@ -18,7 +18,7 @@ bool SDInterface::initSD() {
       }
     #endif
 
-    pinMode(SD_CS, OUTPUT);
+    //pinMode(SD_CS, OUTPUT);
 
     delay(10);
     #if defined(MARAUDER_M5STICKC)
@@ -34,9 +34,9 @@ bool SDInterface::initSD() {
       enum { SPI_SCK = 0, SPI_MISO = 36, SPI_MOSI = 26 };
       this->spiExt = new SPIClass();
       this->spiExt->begin(SPI_SCK, SPI_MISO, SPI_MOSI, SD_CS);
-      if (!SD.begin(SD_CS, *(this->spiExt))) {
+      if (!SD_MMC.begin(SD_CS, *(this->spiExt))) {
     #else
-      if (!SD.begin(SD_CS)) {
+      if (!SD_MMC.begin("/sdcard", true, false, SDMMC_FREQ_DEFAULT)) {
     #endif
       Serial.println(F("Failed to mount SD Card"));
       this->supported = false;
@@ -44,7 +44,7 @@ bool SDInterface::initSD() {
     }
     else {
       this->supported = true;
-      this->cardType = SD.cardType();
+      this->cardType = SD_MMC.cardType();
       //if (cardType == CARD_MMC)
       //  Serial.println(F("SD: MMC Mounted"));
       //else if(cardType == CARD_SD)
@@ -54,7 +54,7 @@ bool SDInterface::initSD() {
       //else
       //    Serial.println(F("SD: UNKNOWN Card Mounted"));
 
-      this->cardSizeMB = SD.cardSize() / (1024 * 1024);
+    this->cardSizeMB = SD_MMC.cardSize() / (1024 * 1024);
     
       //Serial.printf("SD Card Size: %lluMB\n", this->cardSizeMB);
 
@@ -73,10 +73,10 @@ bool SDInterface::initSD() {
         this->card_sz = sz;
       }
 
-      if (!SD.exists("/SCRIPTS")) {
+      if (!SD_MMC.exists("/SCRIPTS")) {
         Serial.println("/SCRIPTS does not exist. Creating...");
 
-        SD.mkdir("/SCRIPTS");
+        SD_MMC.mkdir("/SCRIPTS");
         Serial.println("/SCRIPTS created");
       }
 
@@ -95,7 +95,7 @@ bool SDInterface::initSD() {
 
 File SDInterface::getFile(String path) {
   if (this->supported) {
-    File file = SD.open(path, FILE_READ);
+    File file = SD_MMC.open(path, FILE_READ);
 
     //if (file)
     return file;
@@ -103,7 +103,7 @@ File SDInterface::getFile(String path) {
 }
 
 bool SDInterface::removeFile(String file_path) {
-  if (SD.remove(file_path))
+  if (SD_MMC.remove(file_path))
     return true;
   else
     return false;
@@ -111,7 +111,7 @@ bool SDInterface::removeFile(String file_path) {
 
 void SDInterface::listDirToLinkedList(LinkedList<String>* file_names, String str_dir, String ext) {
   if (this->supported) {
-    File dir = SD.open(str_dir);
+    File dir = SD_MMC.open(str_dir);
     while (true)
     {
       File entry = dir.openNextFile();
@@ -137,10 +137,10 @@ void SDInterface::listDirToLinkedList(LinkedList<String>* file_names, String str
 
 void SDInterface::listDir(String str_dir){
   if (this->supported) {
-    File dir = SD.open(str_dir);
+    File dir = SD_MMC.open(str_dir);
     while (true)
     {
-      File entry = dir.openNextFile();
+      File entry =  dir.openNextFile();
       if (! entry)
       {
         break;
@@ -167,7 +167,7 @@ void SDInterface::runUpdate() {
   
     display_obj.tft.println(F(text15));
   #endif
-  File updateBin = SD.open("/update.bin");
+  File updateBin = SD_MMC.open("/update.bin");
   if (updateBin) {
     if(updateBin.isDirectory()){
       #ifdef HAS_SCREEN
@@ -282,12 +282,12 @@ void SDInterface::performUpdate(Stream &updateSource, size_t updateSize) {
 }
 
 bool SDInterface::checkDetectPin() {
-  #ifdef KIT
+  /* #ifdef KIT
     if (digitalRead(SD_DET) == LOW)
       return true;
     else
       return false;
-  #endif
+  #endif*/
 
   return false;
 }
