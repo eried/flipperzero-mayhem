@@ -2,6 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <expansion/expansion.h>
 
 static bool wifi_marauder_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -64,11 +65,9 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     app->text_box_store = furi_string_alloc();
     furi_string_reserve(app->text_box_store, WIFI_MARAUDER_TEXT_BOX_STORE_SIZE);
 
-    app->text_input = wifi_text_input_alloc();
+    app->text_input = text_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        WifiMarauderAppViewTextInput,
-        wifi_text_input_get_view(app->text_input));
+        app->view_dispatcher, WifiMarauderAppViewTextInput, text_input_get_view(app->text_input));
 
     app->widget = widget_alloc();
     view_dispatcher_add_view(
@@ -148,7 +147,7 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     widget_free(app->widget);
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
-    wifi_text_input_free(app->text_input);
+    text_input_free(app->text_input);
     submenu_free(app->submenu);
     variable_item_list_free(app->var_item_list);
     storage_file_free(app->capture_file);
@@ -173,17 +172,17 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
 
 int32_t wifi_marauder_app(void* p) {
     UNUSED(p);
-    furi_hal_power_disable_external_3_3v();
-    furi_hal_power_disable_otg();
-    furi_delay_ms(200);
-    furi_hal_power_enable_external_3_3v();
-    furi_hal_power_enable_otg();
-    for(int i=0;i<2;i++)
-    {
-        furi_delay_ms(500); 
-        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'w'}, 1);
+
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
+    uint8_t attempts = 0;
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
     }
-    furi_delay_ms(1);
+    furi_delay_ms(200);
 
     WifiMarauderApp* wifi_marauder_app = wifi_marauder_app_alloc();
 
@@ -192,6 +191,11 @@ int32_t wifi_marauder_app(void* p) {
 
     wifi_marauder_app->uart = wifi_marauder_usart_init(wifi_marauder_app);
     wifi_marauder_app->lp_uart = wifi_marauder_lp_uart_init(wifi_marauder_app);
+    for(int i = 0; i < 2; i++) {
+        furi_delay_ms(500);
+        wifi_marauder_uart_tx(wifi_marauder_app->uart, (uint8_t[1]){'w'}, 1);
+    }
+    furi_delay_ms(1);
 
     view_dispatcher_run(wifi_marauder_app->view_dispatcher);
 
@@ -200,6 +204,10 @@ int32_t wifi_marauder_app(void* p) {
     if(furi_hal_power_is_otg_enabled()) {
         furi_hal_power_disable_otg();
     }
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

@@ -1,5 +1,6 @@
 #include "camera.h"
 
+#include <expansion/expansion.h>
 
 static void camera_view_draw_callback(Canvas* canvas, void* _model) {
     UartDumpModel* model = _model;
@@ -20,16 +21,15 @@ static void camera_view_draw_callback(Canvas* canvas, void* _model) {
         }
     }
 
-    if (!model->initialized){
-    
+    if(!model->initialized) {
         /*if(!model->marauderInitialized)
         {
           // Init marauder into stream mode
           uint8_t data[] = "\nstream\n";
-          furi_hal_uart_tx(FuriHalUartIdUSART1, data, sizeof(data));
+          furi_hal_serial_tx(app->serial_handle, data, sizeof(data));
         }*/
-    
-        canvas_draw_icon(canvas, 74, 16, &I_DolphinCommon_56x48);
+
+        canvas_draw_icon(canvas, 80, 21, &I_WarningDolphinFlip_45x42);
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 8, 12, "Waiting ESP32-CAM...");
         canvas_draw_str(canvas, 20, 24, "VCC - 3V3/5V");
@@ -40,11 +40,11 @@ static void camera_view_draw_callback(Canvas* canvas, void* _model) {
 }
 
 void get_timefilename(FuriString* name) {
-    FuriHalRtcDateTime datetime = {0};
+    DateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
     furi_string_printf(
         name,
-        EXT_PATH("DCIM/%.4d%.2d%.2d-%.2d%.2d%.2d.bmp"),
+        APP_DATA_PATH("%.4d%.2d%.2d-%.2d%.2d%.2d.bmp"),
         datetime.year,
         datetime.month,
         datetime.day,
@@ -74,22 +74,26 @@ static void save_image(void* context) {
     get_timefilename(file_name);
 
     // this functions open a file, using write access and creates new file if not exist.
-    bool result = storage_file_open(file, furi_string_get_cstr(file_name), FSAM_WRITE, FSOM_OPEN_ALWAYS);
+    bool result =
+        storage_file_open(file, furi_string_get_cstr(file_name), FSAM_WRITE, FSOM_OPEN_ALWAYS);
     //bool result = storage_file_open(file, EXT_PATH("DCIM/test.bmp"), FSAM_WRITE, FSOM_OPEN_ALWAYS);
     furi_string_free(file_name);
 
-    if (result){
+    if(result) {
         storage_file_write(file, bitmap_header, BITMAP_HEADER_LENGTH);
-        with_view_model(app->view, UartDumpModel * model, {
-            int8_t row_buffer[ROW_BUFFER_LENGTH];
-            for (size_t i = 64; i > 0; --i) {
-                for (size_t j = 0; j < ROW_BUFFER_LENGTH; ++j){
-                    row_buffer[j] = model->pixels[((i-1)*ROW_BUFFER_LENGTH) + j];
+        with_view_model(
+            app->view,
+            UartDumpModel * model,
+            {
+                int8_t row_buffer[ROW_BUFFER_LENGTH];
+                for(size_t i = 64; i > 0; --i) {
+                    for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
+                        row_buffer[j] = model->pixels[((i - 1) * ROW_BUFFER_LENGTH) + j];
+                    }
+                    storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
                 }
-                storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
-            }
-            
-        }, false);
+            },
+            false);
     }
 
     // Closing the "file descriptor"
@@ -102,26 +106,23 @@ static void save_image(void* context) {
 }
 
 static bool camera_view_input_callback(InputEvent* event, void* context) {
-    if (event->type == InputTypePress){
+    if(event->type == InputTypePress) {
         uint8_t data[1];
-        if (event->key == InputKeyUp){
+        if(event->key == InputKeyUp) {
             data[0] = 'C';
-        }
-        else if (event->key == InputKeyDown){
+        } else if(event->key == InputKeyDown) {
             data[0] = 'c';
-        }
-        else if (event->key == InputKeyRight){
+        } else if(event->key == InputKeyRight) {
             data[0] = '>';
-        }
-        else if (event->key == InputKeyLeft){
+        } else if(event->key == InputKeyLeft) {
             data[0] = '<';
-        }
-        else if (event->key == InputKeyOk){
+        } else if(event->key == InputKeyOk) {
             save_image(context);
         }
-        furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+        UartEchoApp* app = context;
+        furi_hal_serial_tx(app->serial_handle, data, 1);
     }
-    
+
     return false;
 }
 
@@ -130,47 +131,52 @@ static uint32_t camera_exit(void* context) {
     return VIEW_NONE;
 }
 
-static void camera_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void
+    camera_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     furi_assert(context);
     UartEchoApp* app = context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
     }
 }
 
 static void process_ringbuffer(UartDumpModel* model, uint8_t byte) {
-
     //// 1. Phase: filling the ringbuffer
-    if (model->ringbuffer_index == 0 && byte != 'Y'){ // First char has to be 'Y' in the buffer.
+    if(model->ringbuffer_index == 0 && byte != 'Y') { // First char has to be 'Y' in the buffer.
         return;
     }
-    
-    if (model->ringbuffer_index == 1 && byte != ':'){ // Second char has to be ':' in the buffer or reset.
+
+    if(model->ringbuffer_index == 1 &&
+       byte != ':') { // Second char has to be ':' in the buffer or reset.
         model->ringbuffer_index = 0;
         process_ringbuffer(model, byte);
         return;
     }
 
-    model->row_ringbuffer[model->ringbuffer_index] = byte; // Assign current byte to the ringbuffer;
+    model->row_ringbuffer[model->ringbuffer_index] =
+        byte; // Assign current byte to the ringbuffer;
     ++model->ringbuffer_index; // Increment the ringbuffer index
 
-    if (model->ringbuffer_index < RING_BUFFER_LENGTH){ // Let's wait 'till the buffer fills.
+    if(model->ringbuffer_index < RING_BUFFER_LENGTH) { // Let's wait 'till the buffer fills.
         return;
     }
 
     //// 2. Phase: flushing the ringbuffer to the framebuffer
     model->ringbuffer_index = 0; // Let's reset the ringbuffer
     model->initialized = true; // We've successfully established the connection
-    size_t row_start_index = model->row_ringbuffer[2] * ROW_BUFFER_LENGTH; // Third char will determine the row number
+    size_t row_start_index =
+        model->row_ringbuffer[2] * ROW_BUFFER_LENGTH; // Third char will determine the row number
 
-    if (row_start_index > LAST_ROW_INDEX){ // Failsafe
+    if(row_start_index > LAST_ROW_INDEX) { // Failsafe
         row_start_index = 0;
     }
 
-    for (size_t i = 0; i < ROW_BUFFER_LENGTH; ++i) {
-        model->pixels[row_start_index + i] = model->row_ringbuffer[i+3]; // Writing the remaining 16 bytes into the frame buffer
+    for(size_t i = 0; i < ROW_BUFFER_LENGTH; ++i) {
+        model->pixels[row_start_index + i] =
+            model->row_ringbuffer[i + 3]; // Writing the remaining 16 bytes into the frame buffer
     }
 }
 
@@ -192,10 +198,11 @@ static int32_t camera_worker(void* context) {
                 length = furi_stream_buffer_receive(app->rx_stream, data, intended_data_size, 0);
 
                 if(length > 0) {
-                    //furi_hal_uart_tx(FuriHalUartIdUSART1, data, length);
+                    //furi_hal_serial_tx(app->serial_handle, data, length);
                     with_view_model(
                         app->view,
-                        UartDumpModel * model, {
+                        UartDumpModel * model,
+                        {
                             for(size_t i = 0; i < length; i++) {
                                 process_ringbuffer(model, data[i]);
                             }
@@ -205,7 +212,8 @@ static int32_t camera_worker(void* context) {
             } while(length > 0);
 
             notification_message(app->notification, &sequence_notification);
-            with_view_model(app->view, UartDumpModel * model, { UNUSED(model); }, true);
+            with_view_model(
+                app->view, UartDumpModel * model, { UNUSED(model); }, true);
         }
     }
 
@@ -251,19 +259,19 @@ static UartEchoApp* camera_app_alloc() {
     furi_thread_start(app->worker_thread);
 
     // Enable uart listener
-    furi_hal_console_disable();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 230400);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, camera_on_irq_cb, app);
+    app->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    furi_check(app->serial_handle);
+    furi_hal_serial_init(app->serial_handle, 230400);
+    furi_hal_serial_async_rx_start(app->serial_handle, camera_on_irq_cb, app, false);
 
     furi_hal_power_disable_external_3_3v();
     furi_hal_power_disable_otg();
     furi_delay_ms(200);
     furi_hal_power_enable_external_3_3v();
     furi_hal_power_enable_otg();
-    for(int i=0;i<2;i++)
-    {
-        furi_delay_ms(500); 
-        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'c'}, 1); 
+    for(int i = 0; i < 2; i++) {
+        furi_delay_ms(500);
+        furi_hal_serial_tx(app->serial_handle, (uint8_t[1]){'c'}, 1);
     }
     furi_delay_ms(1);
     return app;
@@ -272,7 +280,9 @@ static UartEchoApp* camera_app_alloc() {
 static void camera_app_free(UartEchoApp* app) {
     furi_assert(app);
 
-    furi_hal_console_enable(); // this will also clear IRQ callback so thread is no longer referenced
+    furi_hal_serial_async_rx_stop(app->serial_handle);
+    furi_hal_serial_deinit(app->serial_handle);
+    furi_hal_serial_control_release(app->serial_handle);
 
     furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventStop);
     furi_thread_join(app->worker_thread);
@@ -298,11 +308,19 @@ static void camera_app_free(UartEchoApp* app) {
 int32_t camera_app(void* p) {
     UNUSED(p);
 
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     UartEchoApp* app = camera_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     camera_app_free(app);
-    
+
     furi_hal_power_disable_otg();
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }
