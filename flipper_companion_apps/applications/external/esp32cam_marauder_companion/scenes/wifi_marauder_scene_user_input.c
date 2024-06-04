@@ -100,20 +100,19 @@ void wifi_marauder_scene_user_input_on_enter(void* context) {
     switch(app->user_input_type) {
     // Loads the string value of the reference
     case WifiMarauderUserInputTypeString:
-        text_input_set_header_text(app->text_input, "Enter value:");
-        text_input_set_validator(app->text_input, NULL, app);
+        wifi_text_input_set_header_text(app->text_input, "Enter value:");
+        wifi_text_input_set_validator(app->text_input, NULL, app);
         if(app->user_input_string_reference != NULL) {
             strncpy(
                 app->text_input_store,
                 *app->user_input_string_reference,
                 strlen(*app->user_input_string_reference) + 1);
         }
-        text_input_add_illegal_symbols(app->text_input);
         break;
     // Loads the numerical value of the reference
     case WifiMarauderUserInputTypeNumber:
-        text_input_set_header_text(app->text_input, "Enter a valid number:");
-        text_input_set_validator(
+        wifi_text_input_set_header_text(app->text_input, "Enter a valid number:");
+        wifi_text_input_set_validator(
             app->text_input, wifi_marauder_scene_user_input_validator_number_callback, app);
         if(app->user_input_number_reference != NULL) {
             char number_str[32];
@@ -123,8 +122,8 @@ void wifi_marauder_scene_user_input_on_enter(void* context) {
         break;
     // File name
     case WifiMarauderUserInputTypeFileName:
-        text_input_set_header_text(app->text_input, "Enter file name:");
-        text_input_set_validator(
+        wifi_text_input_set_header_text(app->text_input, "Enter file name:");
+        wifi_text_input_set_validator(
             app->text_input, wifi_marauder_scene_user_input_validator_file_callback, app);
         break;
     default:
@@ -132,7 +131,7 @@ void wifi_marauder_scene_user_input_on_enter(void* context) {
         return;
     }
 
-    text_input_set_result_callback(
+    wifi_text_input_set_result_callback(
         app->text_input,
         wifi_marauder_scene_user_input_ok_callback,
         app,
@@ -161,5 +160,5 @@ bool wifi_marauder_scene_user_input_on_event(void* context, SceneManagerEvent ev
 void wifi_marauder_scene_user_input_on_exit(void* context) {
     WifiMarauderApp* app = context;
     memset(app->text_input_store, 0, sizeof(app->text_input_store));
-    text_input_reset(app->text_input);
+    wifi_text_input_reset(app->text_input);
 }

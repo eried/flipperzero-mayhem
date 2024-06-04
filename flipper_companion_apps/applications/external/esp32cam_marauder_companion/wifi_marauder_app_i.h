@@ -20,16 +20,14 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
-#include <gui/modules/text_input.h>
+#include "wifi_marauder_text_input.h"
 
 #include <mayhem_marauder_icons.h>
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 #include <dialogs/dialogs.h>
 
-#include <assets_icons.h>
-
-#define NUM_MENU_ITEMS (22)
+#define NUM_MENU_ITEMS (24)
 
 #define WIFI_MARAUDER_TEXT_BOX_STORE_SIZE (4096)
 #define WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE (512)
@@ -38,6 +36,7 @@
 #define MARAUDER_APP_FOLDER EXT_PATH(MARAUDER_APP_FOLDER_USER)
 #define MARAUDER_APP_FOLDER_HTML MARAUDER_APP_FOLDER "/html"
 #define MARAUDER_APP_FOLDER_PCAPS MARAUDER_APP_FOLDER "/pcaps"
+#define MARAUDER_APP_FOLDER_DUMPS MARAUDER_APP_FOLDER "/dumps"
 #define MARAUDER_APP_FOLDER_LOGS MARAUDER_APP_FOLDER "/logs"
 #define MARAUDER_APP_FOLDER_USER_PCAPS MARAUDER_APP_FOLDER_USER "/pcaps"
 #define MARAUDER_APP_FOLDER_USER_LOGS MARAUDER_APP_FOLDER_USER "/logs"
@@ -61,7 +60,7 @@ struct WifiMarauderApp {
     FuriString* text_box_store;
     size_t text_box_store_strlen;
     TextBox* text_box;
-    TextInput* text_input;
+    WIFI_TextInput* text_input;
     Storage* storage;
     File* capture_file;
     File* log_file;
@@ -82,7 +81,6 @@ struct WifiMarauderApp {
     int open_log_file_num_pages;
 
     WifiMarauderUart* uart;
-    WifiMarauderUart* lp_uart;
     int selected_menu_index;
     int selected_option_index[NUM_MENU_ITEMS];
     const char* selected_tx_string;
