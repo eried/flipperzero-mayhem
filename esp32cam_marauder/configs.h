@@ -159,10 +159,10 @@
     //#define HAS_NEOPIXEL_LED
     //#define HAS_PWR_MGMT
     //#define HAS_SCREEN
-	#define DISABLE_RGB_LED
-    //#define HAS_GPS
-	#define HAS_SD
-	#define USE_SD
+    #define DISABLE_RGB_LED
+    #define HAS_GPS
+    #define HAS_SD
+    #define USE_SD
     //#define HAS_TEMP_SENSOR
   #endif
 
@@ -993,8 +993,8 @@
       #define mac_history_len 512
     #elif defined(MARAUDER_FLIPPER)
       #define GPS_SERIAL_INDEX 1
-      #define GPS_TX 9
-      #define GPS_RX 21
+      #define GPS_TX 12 // pin 12 on the esp32-cam connected to gps's tx
+      #define GPS_RX 13 // pin 13 on the esp32-cam connected to gps's rx
       #define mac_history_len 512
     #elif defined(MARAUDER_M5STICKC)
       #define GPS_SERIAL_INDEX 1
