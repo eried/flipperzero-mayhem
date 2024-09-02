@@ -157,7 +157,7 @@ CommandLine::CommandLine() {
 }
 
 void CommandLine::RunSetup() {
-  //Serial.println(this->ascii_art);
+  Serial.println(this->ascii_art);
 
   Serial.println(F("\n\n--------------------------------\n"));
   Serial.println(F("         ESP32 Marauder      \n"));
