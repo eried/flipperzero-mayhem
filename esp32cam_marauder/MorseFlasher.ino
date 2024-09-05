@@ -1,4 +1,4 @@
-// Created by ChatGPT, and symbols added by Bing Chat
+// Created by ChatGPT, and symbols added by Bing Chat, original idea by Nikolai Søndre
 const int LED = 4;
 const int dotDuration = 350;
 const int dashDuration = 3 * dotDuration;
