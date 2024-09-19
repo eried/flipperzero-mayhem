@@ -1,12 +1,12 @@
 // Using EloquentEsp32cam library
-//#include <eloquent_esp32cam.h>
-//#include <eloquent_esp32cam/motion/detection.h>
+#include <eloquent_esp32cam.h>
+#include <eloquent_esp32cam/motion/detection.h>
 
-/*using eloq::camera;
-using eloq::motion::detection;*/
+using eloq::camera;
+using eloq::motion::detection;
 
 void motion_detection_setup() {
-  /*camera.pinout.aithinker();
+  camera.pinout.aithinker();
   camera.brownout.disable();
   camera.resolution.vga();
   camera.quality.high();
@@ -30,15 +30,14 @@ void motion_detection_setup() {
       Serial.println(camera.exception.toString());
 
   Serial.println("Camera OK");
-  Serial.println("Awaiting for motion...");*/
-  Serial.println("Motion detection not available.");
+  Serial.println("Awaiting for motion...");
 }
 
-//unsigned long nextMotionAlert = 0;
+unsigned long nextMotionAlert = 0;
 
 void motion_detection_loop() {
   // capture picture
-  /*if (!camera.capture().isOk()) {
+  if (!camera.capture().isOk()) {
       Serial.println(camera.exception.toString());
       return;
   }
@@ -54,5 +53,5 @@ void motion_detection_loop() {
   
       Serial.println("Motion!");
       nextMotionAlert = millis()+1000;
-  }*/
+  }
 }
