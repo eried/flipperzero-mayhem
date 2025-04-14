@@ -9,7 +9,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog_ex.h>
 
-#define LINES_ON_SCREEN 6
+#define LINES_ON_SCREEN   6
 #define COLUMNS_ON_SCREEN 21
 
 static const NotificationSequence sequence_alarm = {

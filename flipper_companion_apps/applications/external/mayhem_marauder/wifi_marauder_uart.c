@@ -1,9 +1,9 @@
 #include "wifi_marauder_app_i.h"
 #include "wifi_marauder_uart.h"
 
-#define UART_CH (FuriHalSerialIdUsart)
+#define UART_CH    (FuriHalSerialIdUsart)
 #define LP_UART_CH (FuriHalSerialIdLpuart)
-#define BAUDRATE (230400)
+#define BAUDRATE   (230400)
 
 struct WifiMarauderUart {
     WifiMarauderApp* app;

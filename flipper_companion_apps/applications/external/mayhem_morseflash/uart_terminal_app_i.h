@@ -14,10 +14,10 @@
 
 #define NUM_MENU_ITEMS (3)
 
-#define UART_TERMINAL_TEXT_BOX_STORE_SIZE (4096)
+#define UART_TERMINAL_TEXT_BOX_STORE_SIZE   (4096)
 #define UART_TERMINAL_TEXT_INPUT_STORE_SIZE (512)
-#define UART_CH (FuriHalSerialIdUsart)
-#define BAUDRATE (230400)
+#define UART_CH                             (FuriHalSerialIdUsart)
+#define BAUDRATE                            (230400)
 
 struct UART_TerminalApp {
     Gui* gui;
