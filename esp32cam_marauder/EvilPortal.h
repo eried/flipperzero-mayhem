@@ -33,7 +33,7 @@ extern Buffer buffer_obj;
 #define RESET_CMD "reset"
 #define START_CMD "start"
 #define ACK_CMD "ack"
-#define MAX_AP_NAME_SIZE 30
+#define MAX_AP_NAME_SIZE 32
 #define WIFI_SCAN_EVIL_PORTAL 30
 
 char apName[MAX_AP_NAME_SIZE] = "PORTAL";
@@ -52,8 +52,12 @@ struct AccessPoint {
   uint8_t bssid[6];
   bool selected;
   LinkedList<char>* beacon;
-  char rssi;
-  LinkedList<uint8_t>* stations;
+  int8_t rssi;
+  LinkedList<uint16_t>* stations;
+  uint16_t packets;
+  uint8_t sec;
+  bool wps;
+  String man;
 };
 
 class CaptiveRequestHandler : public AsyncWebHandler {

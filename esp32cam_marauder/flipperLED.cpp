@@ -64,6 +64,7 @@ void flipperLED::offLED() {
   digitalWrite(R_PIN, HIGH);
 #endif
 }
+
 void flipperLED::main() {
   // do nothing
 }

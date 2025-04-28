@@ -140,7 +140,7 @@ void SDInterface::listDir(String str_dir){
     File dir = SD_MMC.open(str_dir);
     while (true)
     {
-      File entry =  dir.openNextFile();
+      File entry = dir.openNextFile();
       if (! entry)
       {
         break;
