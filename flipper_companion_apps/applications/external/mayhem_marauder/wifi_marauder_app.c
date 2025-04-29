@@ -101,12 +101,20 @@ void wifi_marauder_make_app_folder(WifiMarauderApp* app) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\npcaps folder");
     }
 
+    if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_DUMPS)) {
+        dialog_message_show_storage_error(app->dialogs, "Cannot create\ndumps folder");
+    }
+
     if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_LOGS)) {
-        dialog_message_show_storage_error(app->dialogs, "Cannot create\npcaps folder");
+        dialog_message_show_storage_error(app->dialogs, "Cannot create\nlogs folder");
     }
 
     if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_SCRIPTS)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\nscripts folder");
+    }
+
+    if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_HTML)) {
+        dialog_message_show_storage_error(app->dialogs, "Cannot create\nhtml folder");
     }
 }
 
@@ -160,7 +168,6 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     scene_manager_free(app->scene_manager);
 
     wifi_marauder_uart_free(app->uart);
-    wifi_marauder_uart_free(app->lp_uart);
 
     // Close records
     furi_record_close(RECORD_GUI);
@@ -172,12 +179,12 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
 
 int32_t wifi_marauder_app(void* p) {
     UNUSED(p);
-
     // Disable expansion protocol to avoid interference with UART Handle
     Expansion* expansion = furi_record_open(RECORD_EXPANSION);
     expansion_disable(expansion);
 
     uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
         furi_hal_power_enable_otg();
         furi_delay_ms(10);
@@ -190,7 +197,7 @@ int32_t wifi_marauder_app(void* p) {
     wifi_marauder_load_settings(wifi_marauder_app);
 
     wifi_marauder_app->uart = wifi_marauder_usart_init(wifi_marauder_app);
-    wifi_marauder_app->lp_uart = wifi_marauder_lp_uart_init(wifi_marauder_app);
+
     for(int i = 0; i < 2; i++) {
         furi_delay_ms(500);
         wifi_marauder_uart_tx(wifi_marauder_app->uart, (uint8_t[1]){'w'}, 1);
@@ -201,7 +208,7 @@ int32_t wifi_marauder_app(void* p) {
 
     wifi_marauder_app_free(wifi_marauder_app);
 
-    if(furi_hal_power_is_otg_enabled()) {
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
         furi_hal_power_disable_otg();
     }
 
