@@ -4,7 +4,7 @@
 #include <momentum/momentum.h>
 
 #define UART_CH  (momentum_settings.uart_esp_channel)
-#define BAUDRATE (115200)
+#define BAUDRATE (230400)
 
 struct WifiMarauderUart {
     WifiMarauderApp* app;
