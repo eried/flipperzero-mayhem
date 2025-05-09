@@ -11,7 +11,6 @@ Check: https://github.com/eried/flipperzero-mayhem/wiki/Compilation-of-the-firmw
 #endif
 
 #include <WiFi.h>
-//#include "Web.h"
 #include "EvilPortal.h"
 #include <Wire.h>
 #include "esp_wifi.h"
@@ -64,13 +63,12 @@ bool camera_initialized = false;
   #include "flipperLED.h"
 #elif defined(XIAO_ESP32_S3)
   #include "xiaoLED.h"
-#elif defined(MARAUDER_M5STICKC)
+#elif defined(MARAUDER_M5STICKC) || defined(MARAUDER_M5STICKCP2)
   #include "stickcLED.h"
-#else
+#elif defined(HAS_NEOPIXEL_LED)
   #include "LedInterface.h"
 #endif
 
-//#include "esp_interface.h"
 #include "settings.h"
 #include "CommandLine.h"
 #include "lang_var.h"
@@ -79,42 +77,35 @@ bool camera_initialized = false;
   #include "BatteryInterface.h"
 #endif
 
-//#ifdef HAS_TEMP_SENSOR
-//  #include "TemperatureInterface.h"
-//#endif
-
 #ifdef HAS_SCREEN
   #include "Display.h"
   #include "MenuFunctions.h"
-  //#include "a32u4_interface.h"
 #endif
 
 #ifdef HAS_BUTTONS
-  #include <SwitchLib.h>
+  #include "Switches.h"
   
   #if (U_BTN >= 0)
-    SwitchLib u_btn = SwitchLib(U_BTN, 1000, true);
+    Switches u_btn = Switches(U_BTN, 1000, U_PULL);
   #endif
   #if (D_BTN >= 0)
-    SwitchLib d_btn = SwitchLib(D_BTN, 1000, true);
+    Switches d_btn = Switches(D_BTN, 1000, D_PULL);
   #endif
   #if (L_BTN >= 0)
-    SwitchLib l_btn = SwitchLib(L_BTN, 1000, true);
+    Switches l_btn = Switches(L_BTN, 1000, L_PULL);
   #endif
   #if (R_BTN >= 0)
-    SwitchLib r_btn = SwitchLib(R_BTN, 1000, true);
+    Switches r_btn = Switches(R_BTN, 1000, R_PULL);
   #endif
   #if (C_BTN >= 0)
-    SwitchLib c_btn = SwitchLib(C_BTN, 1000, true);
+    Switches c_btn = Switches(C_BTN, 1000, C_PULL);
   #endif
 
 #endif
 
 WiFiScan wifi_scan_obj;
 EvilPortal evil_portal_obj;
-//Web web_obj;
 Buffer buffer_obj;
-//EspInterface esp_obj;
 Settings settings_obj;
 CommandLine cli_obj;
 
@@ -126,14 +117,9 @@ CommandLine cli_obj;
   BatteryInterface battery_obj;
 #endif
 
-//#ifdef HAS_TEMP_SENSOR
-//  TemperatureInterface temp_obj;
-//#endif
-
 #ifdef HAS_SCREEN
   Display display_obj;
   MenuFunctions menu_function_obj;
-  //A32u4Interface a32u4_obj;
 #endif
 
 #ifdef HAS_SD
@@ -148,7 +134,7 @@ CommandLine cli_obj;
   flipperLED flipper_led;
 #elif defined(XIAO_ESP32_S3)
   xiaoLED xiao_led;
-#elif defined(MARAUDER_M5STICKC)
+#elif defined(MARAUDER_M5STICKC) || defined(MARAUDER_M5STICKCP2)
   stickcLED stickc_led;
 #else
   LedInterface led_obj;
@@ -187,11 +173,28 @@ void backlightOff() {
   #endif
 }
 
+void motion_detection_setup();
+void motion_detection_loop();
+void qr_reader_setup();
+void qr_reader_loop();
+void cam_stream_setup();
+void cam_stream_loop();
+void nanny_cam_setup();
+void nanny_cam_loop();
+void morse_setup();
+void morse_loop();
 
 void setup()
 {
-  #ifdef MARAUDER_M5STICKC
+  esp_spiram_init();
+
+  #ifdef defined(MARAUDER_M5STICKC) && !defined(MARAUDER_M5STICKCP2)
     axp192_obj.begin();
+  #endif
+
+  #if defined(MARAUDER_M5STICKCP2) // Prevent StickCP2 from turning off when disconnect USB cable
+    pinMode(POWER_HOLD_PIN, OUTPUT);
+    digitalWrite(POWER_HOLD_PIN, HIGH);
   #endif
   
   // Start with the flashlight off
@@ -273,27 +276,10 @@ void setup()
   #endif
 
   Serial.begin(115200);*/
-
-  // Starts a second serial channel to stream the captured packets
-  #ifdef WRITE_PACKETS_SERIAL
-    
-    #ifdef XIAO_ESP32_S3
-      Serial1.begin(115200, SERIAL_8N1, XIAO_RX1, XIAO_TX1);
-    #else
-      Serial1.begin(115200);
-    #endif
-    
-  #endif
-
-  //Serial.println("\n\nHello, World!\n");
+  while(!Serial)
+    delay(10);
 
   Serial.println("ESP-IDF version is: " + String(esp_get_idf_version()));
-
-  //#ifdef HAS_SCREEN
-  //  Serial.println("Has Screen");
-  //#else
-  //  Serial.println("Does not have screen");
-  //#endif
 
   #ifdef HAS_SCREEN
     display_obj.RunSetup();
@@ -303,6 +289,7 @@ void setup()
   backlightOff();
 
   // Draw the title screen
+  /*
   #ifdef HAS_SCREEN
     #ifndef MARAUDER_MINI
       display_obj.drawJpeg("/marauder3L.jpg", 0 , 0);     // 240 x 320 image
@@ -310,22 +297,19 @@ void setup()
       display_obj.drawJpeg("/marauder3L.jpg", 0, 0);
     #endif
   #endif
+  */
 
   #ifdef HAS_SCREEN
-    //showCenterText(version_number, 250);
-    #ifndef MARAUDER_MINI
-      display_obj.tft.drawCentreString(display_obj.version_number, 120, 250, 2);
-    #endif
-  
-    #ifdef MARAUDER_MINI
-      display_obj.tft.drawCentreString(display_obj.version_number, TFT_WIDTH/2, TFT_HEIGHT, 1);
-    #endif
+    display_obj.tft.drawCentreString("ESP32 Marauder", TFT_WIDTH/2, TFT_HEIGHT * 0.33, 1);
+    display_obj.tft.drawCentreString("JustCallMeKoko", TFT_WIDTH/2, TFT_HEIGHT * 0.5, 1);
+    display_obj.tft.drawCentreString(display_obj.version_number, TFT_WIDTH/2, TFT_HEIGHT * 0.66, 1);
   #endif
+
 
   backlightOn(); // Need this
 
   #ifdef HAS_SCREEN
-    delay(2000);
+    //delay(2000);
 
     // Do some stealth mode stuff
     #ifdef HAS_BUTTONS
@@ -338,53 +322,47 @@ void setup()
       }
     #endif
 
-    display_obj.clearScreen();
+    //display_obj.clearScreen();
   
-    display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    //display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
   
-    display_obj.tft.println(text_table0[0]);
+    //display_obj.tft.println(text_table0[0]);
   
-    delay(2000);
+    //delay(2000);
   
-    display_obj.tft.println("Marauder " + display_obj.version_number + "\n");
+    //display_obj.tft.println("Marauder " + display_obj.version_number + "\n");
   
-    display_obj.tft.println(text_table0[1]);
+    //display_obj.tft.println(text_table0[1]);
   #endif
-
-  //Serial.println("Internal Temp: " + (String)((temprature_sens_read() - 32) / 1.8));
 
   settings_obj.begin();
 
-  //Serial.println("This is a test Channel: " + (String)settings_obj.loadSetting<uint8_t>("Channel"));
-  //if (settings_obj.loadSetting<bool>( "Force PMKID"))
-  //  Serial.println("This is a test Force PMKID: true");
-  //else
-  //  Serial.println("This is a test Force PMKID: false");
-
   wifi_scan_obj.RunSetup();
 
-  //Serial.println(wifi_scan_obj.freeRAM());
+  //#ifdef HAS_SCREEN
+  //  display_obj.tft.println(F(text_table0[2]));
+  //#endif
 
-  #ifdef HAS_SCREEN
-    display_obj.tft.println(F(text_table0[2]));
-  #endif
-
-  #ifdef WRITE_PACKETS_SERIAL
-    buffer_obj = Buffer();
-  #elif defined(HAS_SD)
+  buffer_obj = Buffer();
+  #if defined(HAS_SD)
     // Do some SD stuff
     if(sd_obj.initSD()) {
       #ifdef HAS_SCREEN
-        display_obj.tft.println(F(text_table0[3]));
+        //display_obj.tft.println(F(text_table0[3]));
       #endif
     } else {
       Serial.println(F("SD Card NOT Supported"));
       #ifdef HAS_SCREEN
-        display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
-        display_obj.tft.println(F(text_table0[4]));
-        display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+        //display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
+        //display_obj.tft.println(F(text_table0[4]));
+        //display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
       #endif
     }
+  #endif
+
+  #ifdef HAS_SCREEN
+    display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    display_obj.tft.drawCentreString("Initializing...", TFT_WIDTH/2, TFT_HEIGHT * 0.82, 1);
   #endif
 
   evil_portal_obj.setup();
@@ -394,26 +372,15 @@ void setup()
   #endif
   
   #ifdef HAS_SCREEN
-    display_obj.tft.println(F(text_table0[5]));
+    //display_obj.tft.println(F(text_table0[5]));
   #endif
 
-  // Temperature stuff
-  //#ifdef HAS_TEMP_SENSOR
-  //  temp_obj.RunSetup();
-  //#endif
-
   #ifdef HAS_SCREEN
-    display_obj.tft.println(F(text_table0[6]));
+    //display_obj.tft.println(F(text_table0[6]));
   #endif
 
   #ifdef HAS_BATTERY
     battery_obj.battery_level = battery_obj.getBatteryLevel();
-  
-//    if (battery_obj.i2c_supported) {
-//      Serial.println(F("IP5306 I2C Supported: true"));
-//    }
-//    else
-//      Serial.println(F("IP5306 I2C Supported: false"));
   #endif
 
   // Do some LED stuff
@@ -428,38 +395,34 @@ void setup()
   #endif
 
   #ifdef HAS_SCREEN
-    display_obj.tft.println(F(text_table0[7]));
+    //display_obj.tft.println(F(text_table0[7]));
 
-    delay(500);
+    //delay(500);
   #endif
 
   #ifdef HAS_GPS
     gps_obj.begin();
-    #ifdef HAS_SCREEN
-      if (gps_obj.getGpsModuleStatus())
-        display_obj.tft.println("GPS Module connected");
-      else
-        display_obj.tft.println("GPS Module NOT connected");
-    #endif
+    //#ifdef HAS_SCREEN
+      //if (gps_obj.getGpsModuleStatus())
+        //display_obj.tft.println("GPS Module connected");
+      //else
+        //display_obj.tft.println("GPS Module NOT connected");
+    //#endif
   #endif
 
   #ifdef HAS_SCREEN
-    display_obj.tft.println(F(text_table0[8]));
+    //display_obj.tft.println(F(text_table0[8]));
   
     display_obj.tft.setTextColor(TFT_WHITE, TFT_BLACK);
   
-    delay(2000);
+    //delay(2000);
   #endif
 
   #ifdef HAS_SCREEN
     menu_function_obj.RunSetup();
   #endif
 
-  //Serial.println(F("\n\n--------------------------------\n"));
-  //Serial.println(F("         ESP32 Marauder      \n"));
-  //Serial.println("            " + version_number + "\n");
-  //Serial.println(F("       By: justcallmekoko\n"));
-  //Serial.println(F("--------------------------------\n\n"));
+  wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
   
   Serial.println(F("CLI Ready"));
   cli_obj.RunSetup();
@@ -472,40 +435,48 @@ void loop()
   bool mini = false;
 
   #ifdef SCREEN_BUFFER
-    mini = true;
+    #ifndef HAS_ILI9341
+      mini = true;
+    #endif
+  #endif
+
+  #ifdef HAS_ILI9341
+    #ifdef HAS_BUTTONS
+      if (c_btn.isHeld()) {
+        if (menu_function_obj.disable_touch)
+          menu_function_obj.disable_touch = false;
+        else
+          menu_function_obj.disable_touch = true;
+
+        menu_function_obj.updateStatusBar();
+
+        while (!c_btn.justReleased())
+          delay(1);
+      }
+    #endif
   #endif
 
   // Update all of our objects
-  /*#ifdef HAS_SCREEN
-    bool do_draw = display_obj.draw_tft;
-  #else
-    bool do_draw = false;
-  #endif*/
-  
-  //if ((!do_draw) && (wifi_scan_obj.currentScanMode != ESP_UPDATE))
-  //{
   cli_obj.main(currentTime);
   #ifdef HAS_SCREEN
     display_obj.main(wifi_scan_obj.currentScanMode);
   #endif
   wifi_scan_obj.main(currentTime);
-  //evil_portal_obj.main(wifi_scan_obj.currentScanMode);
 
   #ifdef HAS_GPS
     gps_obj.main();
   #endif
   
-  #ifdef WRITE_PACKETS_SERIAL
-    buffer_obj.forceSaveSerial();
-  #elif defined(HAS_SD)
+  // Detect SD card
+  #if defined(HAS_SD)
     sd_obj.main();
-  #else
-    return;
   #endif
+
+  // Save buffer to SD and/or serial
+  buffer_obj.save();
 
   #ifdef HAS_BATTERY
     battery_obj.main(currentTime);
-    //temp_obj.main(currentTime);
   #endif
   settings_obj.main(currentTime);
   if (((wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR) && (wifi_scan_obj.currentScanMode != WIFI_SCAN_EAPOL)) ||
@@ -513,7 +484,6 @@ void loop()
     #ifdef HAS_SCREEN
       menu_function_obj.main(currentTime);
     #endif
-    //cli_obj.main(currentTime);
   }
   #ifdef MARAUDER_FLIPPER
     flipper_led.main();
@@ -525,29 +495,9 @@ void loop()
     led_obj.main(currentTime);
   #endif
 
-  //if (wifi_scan_obj.currentScanMode == OTA_UPDATE)
-  //  web_obj.main();
   #ifdef HAS_SCREEN
     delay(1);
   #else
     delay(50);
   #endif
-  //}
-  /*else if (wifi_scan_obj.currentScanMode == ESP_UPDATE) {
-    #ifdef HAS_SCREEN
-      display_obj.main(wifi_scan_obj.currentScanMode);
-      menu_function_obj.main(currentTime);
-    #endif
-
-    #ifdef MARAUDER_FLIPPER
-      flipper_led.main();
-    #elif defined(XIAO_ESP32_S3)
-      xiao_led.main();
-    #else
-      led_obj.main(currentTime);
-    #endif
-    
-    //cli_obj.main(currentTime);
-    delay(1);
-  }*/
 }

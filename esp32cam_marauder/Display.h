@@ -39,16 +39,22 @@
 #define LV_ADD_SSID 14
 #define WIFI_ATTACK_BEACON_LIST 15
 
+#define RED_KEY ";red;"
+#define GREEN_KEY ";grn;"
+#define CYAN_KEY ";cyn;"
+#define MAGENTA_KEY ";mgn;"
+#define WHITE_KEY ";wht;"
+
 class Display
 {
   private:
     bool SwitchOn = false;
-
+    
     bool run_setup = true;
-
+    
     // For the byte we read from the serial port
     byte data = 0;
-
+    
     // A few test variables used during debugging
     boolean change_colour = 1;
     boolean selected = 1;
@@ -58,6 +64,7 @@ class Display
     #ifdef SCREEN_BUFFER
       void scrollScreenBuffer(bool down = false);
     #endif
+    void processAndPrintString(TFT_eSPI& tft, const String& originalString);
 
   public:
     Display();
@@ -105,12 +112,12 @@ class Display
     void tftDrawColorKey();
     void tftDrawXScaleButtons(byte x_scale);
     void tftDrawYScaleButtons(byte y_scale);
-    void tftDrawChannelScaleButtons(int set_channel);
-    void tftDrawExitScaleButtons();
+    void tftDrawChannelScaleButtons(int set_channel, bool lnd_an = true);
+    void tftDrawExitScaleButtons(bool lnd_an = true);
     void buildBanner(String msg, int xpos);
     void clearScreen();
     void displayBuffer(bool do_clear = false);
-    void drawJpeg(const char *filename, int xpos, int ypos);
+    //void drawJpeg(const char *filename, int xpos, int ypos);
     void getTouchWhileFunction(bool pressed);
     void initScrollValues(bool tte = false);
     void jpegInfo();

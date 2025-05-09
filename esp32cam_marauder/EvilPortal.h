@@ -13,21 +13,16 @@
   #include "Display.h"
   #include <LinkedList.h>
 #endif
-#ifndef WRITE_PACKETS_SERIAL
-  #include "SDInterface.h"
-#else
-  #include "Buffer.h"
-#endif
+#include "SDInterface.h"
+#include "Buffer.h"
 #include "lang_var.h"
 
 extern Settings settings_obj;
-#ifndef WRITE_PACKETS_SERIAL
-  extern SDInterface sd_obj;
-#endif
+extern SDInterface sd_obj;
 #ifdef HAS_SCREEN
   extern Display display_obj;
 #endif
-extern Buffer buffer_obj;
+extern Buffer buffer_obj; 
 
 #define WAITING 0
 #define GOOD 1
@@ -38,7 +33,7 @@ extern Buffer buffer_obj;
 #define RESET_CMD "reset"
 #define START_CMD "start"
 #define ACK_CMD "ack"
-#define MAX_AP_NAME_SIZE 30
+#define MAX_AP_NAME_SIZE 32
 #define WIFI_SCAN_EVIL_PORTAL 30
 
 char apName[MAX_AP_NAME_SIZE] = "PORTAL";
@@ -57,8 +52,12 @@ struct AccessPoint {
   uint8_t bssid[6];
   bool selected;
   LinkedList<char>* beacon;
-  char rssi;
-  LinkedList<uint8_t>* stations;
+  int8_t rssi;
+  LinkedList<uint16_t>* stations;
+  uint16_t packets;
+  uint8_t sec;
+  bool wps;
+  String man;
 };
 
 class CaptiveRequestHandler : public AsyncWebHandler {
@@ -95,7 +94,6 @@ class EvilPortal {
     void setupServer();
     void startPortal();
     void startAP();
-    void convertStringToUint8Array(const String& str, uint8_t*& buf, uint32_t& len);
     void sendToDisplay(String msg);
 
   public:
@@ -111,7 +109,6 @@ class EvilPortal {
     String get_user_name();
     String get_password();
     void setup();
-    void addLog(String log, int len);
     bool begin(LinkedList<ssid>* ssids, LinkedList<AccessPoint>* access_points);
     void main(uint8_t scan_mode);
     void setHtmlFromSerial();

@@ -5,3 +5,4 @@ debug*.json
 .vscode/arduino.json
 .vscode/c_cpp_properties.json
 *.3mf
+esp32cam_marauder/.vscode/settings.json
