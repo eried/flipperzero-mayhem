@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed hold-OK favorite toggle not updating UI when playing from file browser
 - Fixed M3U playlist files not appearing in ESP32 SD card browser
 - Updated max favorite tracks from 20 to 40. When favorites list is full and user tries to add a new track, there's a different vibration feedback with a red led.
+- Added Roguemaster Firmware compatability.
 
 
 

@@ -12,30 +12,38 @@
 #include <notification/notification_messages.h>
 #include <storage/storage.h>
 #include <stdio.h>
+#if __has_include(<cfw/cfw.h>)
+#include <cfw/cfw.h>
+#endif
 
 #define TAG "BtAudio"
 
-#define BT_AUDIO_UART_CH (FuriHalSerialIdUsart)
-#define BT_AUDIO_BAUDRATE (115200)
-#define BT_AUDIO_RX_BUF_SIZE (256)
-#define BT_AUDIO_MAX_DEVICES (10)
-#define BT_AUDIO_DEVICE_NAME_LEN (64)
-#define BT_AUDIO_MAC_LEN (18)
-#define BT_AUDIO_CMD_BUF_SIZE (32)
-#define BT_AUDIO_FILENAME_LEN (128)
-#define BT_AUDIO_MAX_FAVORITES (40)  // Maximum number of favorite tracks
-#define BT_AUDIO_BT_NAME_LEN (32)    // Max Bluetooth device name length
+
+#if __has_include(<cfw/cfw.h>)
+#define BT_AUDIO_UART_CH             (cfw_settings.uart_esp_channel)
+#else
+#define BT_AUDIO_UART_CH             (FuriHalSerialIdUsart)
+#endif
+#define BT_AUDIO_BAUDRATE            (115200)
+#define BT_AUDIO_RX_BUF_SIZE         (256)
+#define BT_AUDIO_MAX_DEVICES         (10)
+#define BT_AUDIO_DEVICE_NAME_LEN     (64)
+#define BT_AUDIO_MAC_LEN             (18)
+#define BT_AUDIO_CMD_BUF_SIZE        (32)
+#define BT_AUDIO_FILENAME_LEN        (128)
+#define BT_AUDIO_MAX_FAVORITES       (40)  // Maximum number of favorite tracks
+#define BT_AUDIO_BT_NAME_LEN         (32)  // Max Bluetooth device name length
 #define BT_AUDIO_DEVICE_HISTORY_SIZE (10)  // Maximum number of device history entries
-#define BT_AUDIO_WIFI_SSID_LEN (64)    // Max WiFi SSID length
-#define BT_AUDIO_WIFI_PASS_LEN (64)    // Max WiFi password length
-#define BT_AUDIO_STREAM_URL_LEN (256)  // Max stream URL length
+#define BT_AUDIO_WIFI_SSID_LEN       (64)  // Max WiFi SSID length
+#define BT_AUDIO_WIFI_PASS_LEN       (64)  // Max WiFi password length
+#define BT_AUDIO_STREAM_URL_LEN      (256) // Max stream URL length
 
 // Config file path
-#define BT_AUDIO_CONFIG_DIR "/ext/apps_data/bt_audio"
-#define BT_AUDIO_CONFIG_FILE "/ext/apps_data/bt_audio/config.txt"
-#define BT_AUDIO_FAVORITES_FILE "/ext/apps_data/bt_audio/favorites.txt"
+#define BT_AUDIO_CONFIG_DIR          "/ext/apps_data/bt_audio"
+#define BT_AUDIO_CONFIG_FILE         "/ext/apps_data/bt_audio/config.txt"
+#define BT_AUDIO_FAVORITES_FILE      "/ext/apps_data/bt_audio/favorites.txt"
 #define BT_AUDIO_DEVICE_HISTORY_FILE "/ext/apps_data/bt_audio/device_history.txt"
-#define BT_AUDIO_WIFI_CONFIG_FILE "/ext/apps_data/bt_audio/wifi.config"
+#define BT_AUDIO_WIFI_CONFIG_FILE    "/ext/apps_data/bt_audio/wifi.config"
 
 // Device history entry - stores MAC and friendly name for quick reconnect
 typedef struct {
