@@ -8,84 +8,275 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </header>
 <body style="margin:2%;padding:1%">
-    <h1>Mayhem for Flipper Zero -installer</h1>
+    <h1>Mayhem for Flipper Zero - Installer</h1>
     <script type="module" src="https://unpkg.com/esp-web-tools@3.4.2/dist/web/install-button.js?module"></script>
 <style>
-  .container {
-    display: flex;
-    justify-content: space-between;
+  .videos-section {
+      margin: 20px 0;
   }
-  .left-div {
-    text-align: left;
-  }
-  .right-div {
-    width: 100%;
-    margin: 20px;
-    text-align: left;
+  .videos-section iframe {
+      margin-right: 10px;
+      margin-bottom: 10px;
   }
   .changelog-box {
-      width: 80%; /* Adjust the width as needed */
-      border: 1px solid #ccc; /* Border for the rectangle */
+      width: 80%;
+      border: 1px solid #ccc;
       padding: 10px;
       background-color: #f0f0f0;
-      font-family: monospace; /* Console-type font for the changelog content */
-      overflow: auto; /* Add scrollbars if content overflows */
+      font-family: monospace;
+      overflow: auto;
+  }
+  .selection-container {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+  }
+  .selection-container label {
+      font-weight: bold;
+      margin-right: 10px;
+  }
+  .selection-container select {
+      height: 32px;
+      padding: 0 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-right: 8px;
+      vertical-align: middle;
+  }
+  .selection-container esp-web-install-button {
+      vertical-align: middle;
+  }
+  .downloads-box {
+      margin: 15px 0;
+      padding: 12px;
+      background-color: #e8f4fc;
+      border: 1px solid #b8d4e8;
+      border-radius: 5px;
+      font-size: 14px;
+  }
+  .downloads-box a {
+      margin-right: 15px;
+      color: #0066cc;
+  }
+  .downloads-box .download-section {
+      margin: 8px 0;
+  }
+  .downloads-box .download-section-title {
+      font-weight: bold;
+      color: #333;
+  }
+  .toggle-btn {
+      height: 32px;
+      padding: 0 14px;
+      font-size: 14px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      border: none;
+      border-radius: 4px;
+      background-color: #888;
+      color: white;
+      cursor: pointer;
+      margin-right: 8px;
+      font-weight: 400;
+      text-transform: uppercase;
+      vertical-align: middle;
+  }
+  esp-web-install-button::part(button) {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-weight: 400;
+      text-transform: uppercase;
+  }
+  .toggle-btn:hover {
+      background-color: #666;
+  }
+  .toggle-btn.active {
+      background-color: #444;
+  }
+  .hidden {
+      display: none;
+  }
+  .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1000;
+  }
+  .modal-overlay.show {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  }
+  .modal-dialog {
+      background: white;
+      border-radius: 8px;
+      min-width: 200px;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow: auto;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #666;
+  }
+  .modal-close:hover {
+      color: #000;
+  }
+  .modal-title {
+      margin: 0 0 15px 0;
+      font-size: 18px;
+      font-weight: bold;
+  }
+  .modal-content {
+      font-family: monospace;
+      font-size: 13px;
+  }
+  .modal-content .download-section {
+      margin: 10px 0;
+  }
+  .modal-content .download-section-title {
+      font-weight: bold;
+  }
+  .modal-content a {
+      color: #0066cc;
+      margin-right: 10px;
   }
 </style>
 
-<div class="container">
-  
-<div class="left-div"><p>If you have <a href="https://momentum-fw.dev/update/" target="_blank">Momentum firmware</a> on your Flipper Zero, then the apps are already on <i>Apps/GPIO</i>. Go to <a href="https://github.com/eried/flipperzero-mayhem/releases/latest"><img src="https://img.shields.io/github/v/release/eried/flipperzero-mayhem?label=Releases&style=social" /></a> to get precompiled <i>.fap</i> files, or compile your own following <a href=https://github.com/eried/flipperzero-mayhem/wiki/Compilation-of-the-faps>this</a>.</p>
+<div>
+<p>If you have <a href="https://momentum-fw.dev/update/" target="_blank">Momentum firmware</a> on your Flipper Zero, then the apps are already on <i>Apps/GPIO</i>. Go to <a href="https://github.com/eried/flipperzero-mayhem/releases/latest"><img src="https://img.shields.io/github/v/release/eried/flipperzero-mayhem?label=Releases&style=social" /></a> to get the source code and compile.</p>
 
-  <!--
-  <ul>
-    <li><a href="https://flipc.org/eried/flipperzero-mayhem?root=flipper_companion_apps/applications/external/esp32cam_marauder_companion&amp;firmware=unleashed" target="_blank">Marauder v0.6.4</a> (for <i>evil portal</i>, you need <i>ap.config.txt</i> and <i>index.html</i> on your ESP32CAM sd, check <a target="_blank" href=https://github.com/justcallmekoko/ESP32Marauder/wiki/evilportal>here</a>)</li>
-    <li><a href="https://flipc.org/eried/flipperzero-mayhem?root=flipper_companion_apps/applications/external/esp32cam_camera&amp;firmware=unleashed" target="_blank">Camera v1.0.0</a></li>
-    <li><a href="https://flipc.org/eried/flipperzero-mayhem?root=flipper_companion_apps/applications/external/esp32cam_morseflasher&amp;firmware=unleashed" target="_blank">MorseFlasher v0.1</a> (decoder app: <a target="_blank" href=https://m.apkpure.com/morse-code-agent-standard/com.erdatsai.morsecodeagent>apk</a>/<a target="_blank" href=https://play.google.com/store/apps/details?id=com.erdatsai.morsecodeagentpro>pro</a>)</li>
-    <li><a href="https://flipc.org/eried/flipperzero-mayhem?root=flipper_companion_apps/applications/external/esp32cam_nannycam&amp;firmware=unleashed" target="_blank">NannyCam v0.1</a></li>
-    <li><a href="https://flipc.org/eried/flipperzero-mayhem?root=flipper_companion_apps/applications/external/esp32cam_motion_detection&amp;firmware=unleashed" target="_blank">Motion v0.1</a></li>
-    <li><a href="https://flipc.org/eried/flipperzero-mayhem?root=flipper_companion_apps/applications/external/esp32cam_qrcode&amp;firmware=unleashed" target="_blank">QRcode v0.1</a></li>
-  </ul>
-  -->
-
-To prepare the board for uploading, jumper pin <strong>IO0</strong> to <strong>GND</strong> and press and release reset on the ESP32CAM. Upload the firmware pressing Install button below. For more details on the apps check <a href="https://www.youtube.com/watch?v=F9Zp6oM2KYs">this</a> video, or take a look of the <a href="https://github.com/eried/flipperzero-mayhem/wiki">documentation</a>.<br><br><strong>Note 1:</strong> If you are using your Flipper to upload the firmware, remember to go to GPIO/USB-UART Bridge. After the upload, reset the ESP32 (or unplug/replug the module).<br><br><strong>Note 2:</strong> If you do not see the Install button below, your browser might not support this functionality.<br><br><strong>Note 3:</strong> <a href="https://github.com/eried/flipperzero-mayhem/wiki/Known-issues#mode-switch">Unplug</a> the USB-C cable to test the apps.<br><br>
-    <esp-web-install-button manifest="build/manifest.json"></esp-web-install-button>
-<p>Enjoy!</p></div>
-    
-      <div class="right-div"><!--<blockquote class="tiktok-embed" cite="https://www.tiktok.com/@erwinried/video/7194596683051764998" data-video-id="7194596683051764998" style="max-width: 605px;min-width: 325px;" > <section> <a target="_blank" title="@erwinried" href="https://www.tiktok.com/@erwinried?refer=embed">@erwinried</a> <a title="flipper" target="_blank" href="https://www.tiktok.com/tag/flipper?refer=embed">#flipper</a> <a title="flipperzero" target="_blank" href="https://www.tiktok.com/tag/flipperzero?refer=embed">#flipperzero</a> <a title="esp32" target="_blank" href="https://www.tiktok.com/tag/esp32?refer=embed">#esp32</a> <a target="_blank" title="? original sound - Erwin Ried" href="https://www.tiktok.com/music/original-sound-7194596679625001734?refer=embed">? original sound - Erwin Ried</a> </section> </blockquote> <script async src="https://www.tiktok.com/embed.js"></script>-->
-        <iframe width="400" height="230" src="https://www.youtube.com/embed/FATi5LiDsE0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-          
-    <iframe width="400" height="230" src="https://www.youtube.com/embed/PVgeHghKsnQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>    
-        
-        </div>
-    
+To prepare the board for uploading, jumper pin <strong>IO0</strong> to <strong>GND</strong> and press and release reset on the ESP32CAM. Upload the firmware pressing Install button below. For more details on the apps check <a href="https://www.youtube.com/watch?v=F9Zp6oM2KYs">this</a> video, or take a look of the <a href="https://github.com/eried/flipperzero-mayhem/wiki">documentation</a>.<br><br><strong>Note 1:</strong> If you are using your Flipper to upload the firmware, remember to go to GPIO/USB-UART Bridge. After the upload, reset the ESP32 (or unplug/replug the module).<br><br><strong>Note 2:</strong> If you do not see the Install button below, your browser might not support this functionality.<br><br><strong>Note 3:</strong> <a href="https://github.com/eried/flipperzero-mayhem/wiki/Known-issues#mode-switch">Unplug</a> the USB-C cable to test the apps.
 </div>
 
-<div class="changelog-box">
-Changelog<br><br>
-v0.13.6 2023-12-20<br>
-* Updated Marauder to latest version<br>
-* Updated Marauder companion to v0.6.6<br>
-<br>
-v0.13.5 r1 2023-12-14<br>
-* Enabled bluetooth functionality for Marauder<br>
-<br>
-v0.13.5 2023-12-04<br>
-* Updated Marauder to latest version<br>
-* Updated Marauder companion to v0.6.5<br>
-<br>
-v0.13.4 2023-11-19<br>
-* Updated Marauder to latest version<br>
-<br>
-v0.13.3 2023-11-08<br>
-* Updated Marauder to latest version<br>
-* Updated Marauder companion to v0.6.4<br>
-<br>
-v0.12.0 2023-09-14<br>
-* All the apps will have the version number now in the name<br>
-* Updated Marauder code to latest version<br>
-* Removed EvilPortal companion, since Marauder implements it now<br>
+<div class="selection-container">
+    <select id="firmware-select" onchange="updateVersionOptions()">
+        <option value="marauder">Mayhem Marauder</option>
+        <option value="bt_audio">FatherDivine's BT Audio</option>
+    </select><select id="version-select" onchange="updateManifest()">
+        <option value="1.4.4">v1.4.4</option>
+        <option value="0.13.6">v0.13.6</option>
+    </select><button class="toggle-btn" id="show-files-btn" onclick="toggleFiles()">Download</button><button class="toggle-btn" id="changelog-btn" style="margin-right:8px" onclick="toggleChangelog()">Changelog</button><esp-web-install-button id="install-button" manifest="marauder_1.4.4/manifest.json"></esp-web-install-button>
 </div>
+
+<div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-dialog" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <div id="modal-title" class="modal-title"></div>
+        <div id="modal-content" class="modal-content"></div>
+    </div>
+</div>
+
+<div class="videos-section">
+    <iframe width="400" height="230" src="https://www.youtube.com/embed/FATi5LiDsE0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    <iframe width="400" height="230" src="https://www.youtube.com/embed/PVgeHghKsnQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+<script src="files.js"></script>
+<script>
+
+function updateVersionOptions() {
+    const firmwareSelect = document.getElementById('firmware-select');
+    const versionSelect = document.getElementById('version-select');
+    const selectedFirmware = firmwareSelect.value;
+    const versions = firmwareData[selectedFirmware].versions;
+
+    versionSelect.innerHTML = '';
+    versions.forEach(version => {
+        const option = document.createElement('option');
+        option.value = version;
+        option.textContent = 'v' + version;
+        versionSelect.appendChild(option);
+    });
+
+    updateManifest();
+}
+
+function updateManifest() {
+    const firmwareSelect = document.getElementById('firmware-select');
+    const versionSelect = document.getElementById('version-select');
+    const installButton = document.getElementById('install-button');
+
+    const selectedFirmware = firmwareSelect.value;
+    const selectedVersion = versionSelect.value;
+
+    const manifestPath = firmwareData[selectedFirmware].manifests[selectedVersion];
+    installButton.setAttribute('manifest', manifestPath);
+}
+
+function toggleFiles() {
+    const firmwareSelect = document.getElementById('firmware-select');
+    const versionSelect = document.getElementById('version-select');
+    const selectedFirmware = firmwareSelect.value;
+    const selectedVersion = versionSelect.value;
+    const downloads = firmwareData[selectedFirmware].downloads[selectedVersion];
+
+    let html = '';
+    if (downloads.fap) {
+        html += `<div class="download-section"><span class="download-section-title">Flipper:</span> <a href="${downloads.fap.path}" download>${downloads.fap.name}</a></div>`;
+    }
+    if (downloads.elf) {
+        html += `<div class="download-section"><span class="download-section-title">ELF:</span> <a href="${downloads.elf.path}" download>${downloads.elf.name}</a></div>`;
+    }
+    if (downloads.bins && downloads.bins.length > 0) {
+        html += `<div class="download-section"><span class="download-section-title">Other:</span> `;
+        downloads.bins.forEach(bin => {
+            html += `<a href="${bin.path}" download>${bin.name}</a> `;
+        });
+        html += `</div>`;
+    }
+
+    openModal('Download', html);
+}
+
+function toggleChangelog() {
+    const firmwareSelect = document.getElementById('firmware-select');
+    const selectedFirmware = firmwareSelect.value;
+    const changelog = firmwareData[selectedFirmware].changelog;
+
+    let html = '';
+    changelog.forEach(entry => {
+        html += `${entry.version}${entry.date ? ' ' + entry.date : ''}<br>`;
+        entry.changes.forEach(change => {
+            html += `* ${change}<br>`;
+        });
+        html += '<br>';
+    });
+
+    openModal('Changelog', html);
+}
+
+function openModal(title, content) {
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-content').innerHTML = content;
+    document.getElementById('modal-overlay').classList.add('show');
+}
+
+function closeModal(event) {
+    if (!event || event.target === document.getElementById('modal-overlay')) {
+        document.getElementById('modal-overlay').classList.remove('show');
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateVersionOptions();
+});
+</script>
 
 </body>
 </html>
