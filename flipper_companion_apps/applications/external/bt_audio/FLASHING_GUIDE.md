@@ -77,8 +77,8 @@ flash_bt_audio.bat
 If you haven't already:
 
 ```bash
-git clone https://github.com/FatherDivine/flipperzero-firmware-wPlugins.git
-cd flipperzero-firmware-wPlugins/applications/external/bt_audio/esp32_firmware/
+git clone https://github.com/eried/flipperzero-mayhem.git
+cd flipperzero-mayhem/flipper_companion_apps/applications/external/bt_audio/esp32_firmware/
 ```
 
 ### Step 2: Connect ESP32 to Computer
@@ -415,7 +415,7 @@ python -m pip install esptool
 3. **Don't flash while connected to Flipper unless it's a Mayhem Board or supported**
    - Flash with USB to computer only
    - Disconnect, then connect to Flipper
-   - Disregard this note if using a Mayhem V2, as those are meant to be flashed connected to the Flipper using the flipper GPIO UART app.The Mayhem has no ports to easily connect to a PC otherwise. Instructions+video is found here: https://flipper.ried.cl/webinstaller_1.4.4/
+   - Disregard this note if using a Mayhem V2, as those are meant to be flashed connected to the Flipper using the flipper GPIO UART app.The Mayhem has no ports to easily connect to a PC otherwise. Instructions+video is found here: https://flipper.ried.cl/webinstaller/
 
 4. **Power considerations**
    - ESP32 draws ~160mA during BT streaming
