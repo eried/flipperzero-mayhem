@@ -82,10 +82,12 @@ bool bt_audio_scene_saved_devices_on_event(void* context, SceneManagerEvent even
             
             // Copy MAC address to device list slot 0 for connection
             // Format: "MAC,Name" - connect scene will extract MAC
+            // MAC is 17 chars (AA:BB:CC:DD:EE:FF), truncate name to fit buffer:
+            // 64 - 17 (MAC) - 1 (comma) - 1 (null) = 45 chars max for name
             snprintf(
                 app->device_list[0],
                 BT_AUDIO_DEVICE_NAME_LEN,
-                "%s,%s",
+                "%.17s,%.45s",
                 app->device_history[device_index].mac,
                 app->device_history[device_index].name);
             app->device_count = 1;

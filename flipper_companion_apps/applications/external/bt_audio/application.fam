@@ -5,9 +5,9 @@ App(
     entry_point="bt_audio_app",
     stack_size=2 * 1024,
     fap_icon="bt_audio_10px.png",
-    fap_category="GPIO/MAYHEM"",
+    fap_category="GPIO/MAYHEM",
     fap_author="Father Divine",
-    fap_version="1.1",
+    fap_version="1.2",
     fap_description="Control ESP32 Bluetooth Audio via UART",
     sources=["bt_audio.c", "bt_audio_uart.c", "lib/qrcodegen/qrcodegen.c", "scenes/*.c"],
 )
