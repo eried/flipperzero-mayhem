@@ -79,7 +79,7 @@ BtAudioUart* bt_audio_uart_init(BtAudio* app) {
     uart->rx_stream = furi_stream_buffer_alloc(BT_AUDIO_RX_BUF_SIZE, 1);
     uart->rx_thread = furi_thread_alloc();
     furi_thread_set_name(uart->rx_thread, "BtAudioUartRx");
-    furi_thread_set_stack_size(uart->rx_thread, 1024);
+    furi_thread_set_stack_size(uart->rx_thread, 2048);  // Increased from 1024 for better stability
     furi_thread_set_context(uart->rx_thread, uart);
     furi_thread_set_callback(uart->rx_thread, uart_worker);
     furi_thread_start(uart->rx_thread);

@@ -2,6 +2,7 @@
 #include "lib/qrcodegen/qrcodegen.h"
 #include <stdlib.h>
 #include <string.h>
+#include <expansion/expansion.h>
 
 // Default initial volume (~75% of max 127)
 #define BT_AUDIO_DEFAULT_VOLUME 96
@@ -956,10 +957,21 @@ static void bt_audio_free(BtAudio* app) {
 
 int32_t bt_audio_app(void* p) {
     UNUSED(p);
+    
+    // Disable expansion protocol to avoid interference with UART Handle
+    // This prevents "Stack watermark is too low" errors on Momentum firmware
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     BtAudio* app = bt_audio_alloc();
 
     view_dispatcher_run(app->view_dispatcher);
 
     bt_audio_free(app);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
+    
     return 0;
 }

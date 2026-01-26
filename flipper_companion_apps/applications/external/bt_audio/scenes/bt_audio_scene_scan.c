@@ -57,7 +57,7 @@ static void bt_audio_uart_rx_callback(const char* data, size_t len, void* contex
                 app->device_list[app->device_count][BT_AUDIO_DEVICE_NAME_LEN - 1] = '\0';
                 app->device_count++;
                 size_t name_len =
-                    strnlen(app->device_list[app->device_count - 1], BT_AUDIO_DEVICE_NAME_LEN);
+                    strlen(app->device_list[app->device_count - 1]);
                 FURI_LOG_I(TAG, "Device found: %.*s", (int)name_len, app->device_list[app->device_count - 1]);
 
                 // Send event to update the UI with device count

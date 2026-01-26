@@ -24,7 +24,7 @@ The app automatically checks for ESP32 presence by sending a `VERSION` command w
 
 1. **Flash the ESP32 firmware**
    - CLI: run `./flash_bt_audio.sh` (Linux/macOS) or `flash_bt_audio.bat` (Windows) from `esp32_firmware/`.
-   - (Possibly in the future DOES NOT WORK NOW): use the Web Installer at [flipper.ried.cl/webinstaller_1.4.4](https://flipper.ried.cl/webinstaller_1.4.4/). Chrome/Edge will show an **Install** button; if it is missing, your browser does not support Web Serial. *CURRENTLY ONLY GOOD FOR PUTTING MARAUDER BACK ON, AND NOT bt_audio FIRMWARE*
+   - Use the Web Installer at [flipper.ried.cl/webinstaller](https://flipper.ried.cl/webinstaller/). Chrome/Edge will show an **Install** button; if it is missing, your browser does not support Web Serial. *CURRENTLY ONLY GOOD FOR PUTTING MARAUDER BACK ON, AND NOT bt_audio FIRMWARE*
 2. **Put ESP32-CAM into bootloader**: jumper **IO0 → GND** and tap **RESET**. On camera-style boards, you can also momentarily short the two gold pads above the camera while holding IO0 and GND (as shown in the linked video).
 3. **Wire to Flipper GPIO**: TX (pin 13) → ESP32 RX, RX (pin 14) → ESP32 TX, GND → GND. Disconnect ESP32 USB power before plugging into Flipper.
 4. **Launch the app**: Apps → GPIO → BT Audio → Scan → Connect → Play Test Tone.
@@ -615,7 +615,7 @@ You can flash the ESP32 directly through Flipper Zero without a separate USB-to-
    - RTS/DTR pins: **none**
    - DE/RE pin: **none**
 4. **Flash from your computer/phone**  
-   - With Flipper connected over USB, run the `flash_bt_audio` script. The same installer can restore Marauder firmware when you pick the Marauder image (or use the Web Installer at [flipper.ried.cl/webinstaller_1.4.4/](https://flipper.ried.cl/webinstaller_1.4.4/) to flash the Marauder firmware back).
+   - With Flipper connected over USB, run the `flash_bt_audio` script. The same installer can restore Marauder firmware when you pick the Marauder image (or use the Web Installer at [flipper.ried.cl/webinstaller/](https://flipper.ried.cl/webinstaller) to flash the Marauder firmware back).
 5. **Reset after upload**  
    Press the ESP32 reset button or unplug/replug the module. Unplug the Flipper USB-C cable before testing wireless apps on the board.
 

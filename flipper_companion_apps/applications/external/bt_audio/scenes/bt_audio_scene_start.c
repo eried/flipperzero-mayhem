@@ -206,7 +206,7 @@ bool bt_audio_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(app->scene_manager, BtAudioSceneStart, SubmenuIndexAbout + ABOUT_VIEW_STATE_OFFSET);
             furi_string_printf(
                 app->text_box_store,
-                "BT Audio v1.0\n"
+                "BT Audio v1.2\n"
                 "Created by FatherDivine\n\n"
                 "An ESP32 Bluetooth Audio\n"
                 "Controller over UART\n"

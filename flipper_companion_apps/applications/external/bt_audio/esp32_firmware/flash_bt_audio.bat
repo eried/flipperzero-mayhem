@@ -134,8 +134,8 @@ echo [SUCCESS] BT Audio firmware flash complete!
 echo ========================================
 echo.
 echo Next steps:
-echo   1. Disconnect ESP32 from computer
-echo   2. Connect ESP32 to Flipper Zero:
+echo   1. Disconnect ESP32 from computer (or flipper)
+echo   2. (re)Connect ESP32 to Flipper Zero:
 echo      - Flipper TX (pin 13) -^> ESP32 RX
 echo      - Flipper RX (pin 14) -^> ESP32 TX
 echo      - Flipper GND -^> ESP32 GND
@@ -143,6 +143,7 @@ echo   3. Launch BT Audio app on Flipper Zero
 echo   4. Scan and connect to Bluetooth headphones
 echo   5. Play test tone
 echo.
+
 
 if "%MODE%"=="source" (
     echo Mode: A2DP Source - Audio streams TO headphones/speakers
