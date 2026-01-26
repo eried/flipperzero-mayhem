@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Issue of needing to reboot (sometimes 4+ times) for ESP32 to be detected when using momentum
  
 ### Added
-- Momentum Fiwmare support
+- Momentum Firmware support
 - Flipper Zero OFW support
 
 ## [1.1] - 2025-01-13
